@@ -1,0 +1,18 @@
+{
+  "code": 403,
+  "reason": "Forbidden",
+  "message": "Policy validation failed",
+  "detail": {
+    "result": false,
+    "failedPolicyRequirements": [
+      {
+        "policyRequirements": [
+          {
+            "policyRequirement": "VALID_USERNAME"
+          }
+        ],
+        "property": "userName"
+      }
+    ]
+  }
+}

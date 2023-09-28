@@ -1,0 +1,409 @@
+openapi: 3.0.0
+info:
+  title: SCIM API
+  description: A System for Cross-Domain Identity Management API to connect with ForgeRock IDM
+  version: 1.0.0
+servers:
+  - url: http://localhost:8082
+    description: Development server
+  - url: http://localhost:8080
+    description: Production server
+security:
+  - oAuth2AuthCode:
+      - read
+      - write
+      - admin
+tags:
+  - name: Users
+    description: Users-related operations
+  - name: Groups
+    description: Groups-related operations
+  - name: Schemas
+    description: Schema-related operations
+paths:
+  /Users:
+    get:
+      tags:
+        - Users
+      summary: Retrieve all users
+      operationId: getUsers
+      parameters:
+        - in: header
+          name: Authorization
+          schema:
+            type: string
+          required: true
+          description: Authorization header. Bearer token is expected.
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UsersListResponse'
+        '401':
+          description: Invalid Token
+
+    post:
+      tags:
+        - Users
+      summary: Create a new user
+      operationId: createUser
+      parameters:
+        - in: header
+          name: Authorization
+          schema:
+            type: string
+          required: true
+          description: Authorization header. Bearer token is expected.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ScimUser'
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ScimUser'
+        '401':
+          description: Unauthorized. Bearer token is missing or invalid.
+        '409':
+          description: Conflict. The resource could not be created.
+  /Users/{userId}:
+    get:
+      tags:
+        - Users
+      summary: Retrieve a user by ID
+      operationId: getUserById
+      parameters:
+        - in: header
+          name: Authorization
+          schema:
+            type: string
+          required: true
+          description: Authorization header. Bearer token is expected.
+        - in: path
+          name: userId
+          schema:
+            type: string
+          required: true
+          description: ID of the user to retrieve.
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ScimUser'
+        '401':
+          description: Invalid Token
+        '404':
+          description: The requested resource could not be found
+  /Groups:
+    get:
+      tags:
+        - Groups
+      summary: Retrieves all groups.
+      description: This operation retrieves all groups.
+      parameters:
+        - in: header
+          name: Authorization
+          schema:
+            type: string
+          required: true
+          description: Authorization header. Bearer token is expected.
+      responses:
+        '200':
+          description: OK.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GroupsListResponse'
+        '401':
+          description: Unauthorized. Bearer token is missing or invalid.
+        '500':
+          description: Internal Server Error
+    post:
+      tags:
+        - Groups
+      summary: Create a new group
+      operationId: createGroup
+      parameters:
+        - in: header
+          name: Authorization
+          schema:
+            type: string
+          required: false
+          description: Authorization header. Bearer token is expected (optional for now).
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Group'
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Group'
+        '401':
+          description: Unauthorized. Bearer token is missing or invalid.
+        '409':
+          description: Conflict. The resource could not be created.
+  /Groups/{id}:
+    get:
+      tags:
+        - Groups
+      summary: Retrieve a group by ID
+      operationId: getGroupById
+      parameters:
+        - in: header
+          name: Authorization
+          schema:
+            type: string
+          required: true
+          description: Authorization header. Bearer token is required.
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+          description: ID of the group to retrieve.
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Group'
+        '401':
+          description: Invalid Token
+        '404':
+          description: The requested resource could not be found
+    delete:
+      tags:
+        - Groups
+      summary: Delete a group by ID
+      operationId: deleteGroup
+      parameters:
+        - in: header
+          name: Authorization
+          schema:
+            type: string
+          required: false
+          description: Authorization header. Bearer token is expected (optional for now).
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+          description: ID of the group to delete.
+      responses:
+        '200':
+          description: OK. Group deleted successfully.
+        '401':
+          description: Unauthorized. Bearer token is missing or invalid.
+        '404':
+          description: The requested resource could not be found.
+  /Schemas:
+    get:
+      tags:
+        - Schemas
+      summary: Retrieves all schemas.
+      description: This operation returns user and group schemas.
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SchemasListResponse'
+        '401':
+          description: Invalid Token
+components:
+  schemas:
+    UsersListResponse:
+      type: object
+      properties:
+        schemas:
+          type: array
+          items:
+            type: string
+        totalResults:
+          type: integer
+        startIndex:
+          type: integer
+        itemsPerPage:
+          type: integer
+        resources:
+          type: array
+          items:
+            $ref: '#/components/schemas/ScimUser'
+    GroupsListResponse:
+      type: object
+      properties:
+        schemas:
+          type: array
+          items:
+            type: string
+        totalResults:
+          type: integer
+        startIndex:
+          type: integer
+        itemsPerPage:
+          type: integer
+        resources:
+          type: array
+          items:
+            $ref: '#/components/schemas/Group'
+    SchemasListResponse:
+      type: object
+      properties:
+        schemas:
+          type: array
+          items:
+            type: string
+        totalResults:
+          type: integer
+        startIndex:
+          type: integer
+        itemsPerPage:
+          type: integer
+        resources:
+          type: array
+          items:
+            $ref: '#/components/schemas/Schema'
+    ScimUser:
+      type: object
+      properties:
+        id:
+          type: string
+        userName:
+          type: string
+        name:
+          $ref: '#/components/schemas/Name'
+        emails:
+          type: array
+          items:
+            $ref: '#/components/schemas/Email'
+        phoneNumbers:
+          type: array
+          items:
+            $ref: '#/components/schemas/PhoneNumber'
+        address:
+          $ref: '#/components/schemas/Address'
+    Name:
+      type: object
+      properties:
+        givenName:
+          type: string
+        middleName:
+          type: string
+        formatted:
+          type: string
+    Email:
+      type: object
+      properties:
+        value:
+          type: string
+        type:
+          type: string
+        primary:
+          type: boolean
+    PhoneNumber:
+      type: object
+      properties:
+        value:
+          type: string
+        type:
+          type: string
+    Address:
+      type: object
+      properties:
+        formatted:
+          type: string
+        locality:
+          type: string
+        region:
+          type: string
+        postalCode:
+          type: string
+        country:
+          type: string
+        primary:
+          type: boolean
+    Group:
+      type: object
+      description: Group resource
+      properties:
+        id:
+          type: string
+          description: Unique identifier for the group
+        displayName:
+          type: string
+          description: Display name of the group
+        description:
+          type: string
+          description: Description of the group
+    Schema:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Unique identifier for the schema
+        name:
+          type: string
+          description: Name of the schema
+        description:
+          type: string
+          description: Description of the schema
+        attributes:
+          type: array
+          description: Schema attributes
+          items:
+            $ref: '#/components/schemas/Attribute'
+    Attribute:
+      type: object
+      description: Attribute of a schema
+      properties:
+        name:
+          type: string
+          description: Name of the attribute
+        type:
+          type: string
+          description: Type of the attribute
+        description:
+          type: string
+          description: Description of the attribute
+        subAttributes:
+          type: array
+          description: Sub-attributes of the attribute
+          items:
+            $ref: '#/components/schemas/SubAttribute'
+    SubAttribute:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Name of the sub-attribute
+        type:
+          type: string
+          description: Type of the sub-attribute
+        description:
+          type: string
+          description: Description of the sub-attribute
+  securitySchemes:
+    oAuth2AuthCode:
+      type: oauth2
+      flows:
+        authorizationCode:
+          authorizationUrl: https://example.openam.com/oauth/authorize
+          tokenUrl: https://example.openam.com/api/oauth.access
+          scopes:
+            read: Read only access
+            write: Read Write access
+            admin: Admin access

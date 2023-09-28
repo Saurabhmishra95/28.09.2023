@@ -1,0 +1,23 @@
+build:
+  type: java
+  java_version: openjdk17
+  versioning: auto
+  version_prefix: 1
+  script:
+  - mvn clean package
+sonar:
+  project_key: "NA:Health:CIAM:00000_ciam-userportal-services"
+  enforce_quality_gate: false
+  properties:
+    sonar.tests: "src/test/java"
+    sonar.sources: "src/main/java"
+    sonar.coverage.exclusions: "**/changelogs/*.*,**/configuration/**/*.*,**/dto/**/*.*,**/src/test/**,**/entity/**/*.*,**/util/**/*.*,**/service/impl/storage/s3/ECSStorageService.java"
+    sonar.coverage.jacoco.xmlReportPaths: "**/target/jacoco/report/jacoco.xml"
+    sonar.exclusions: "**/changelogs/*.*,**/configuration/**/*.*,**/src/test/**,**/dto/**/*.*,**/entity/**/*.*,**/util/**/*.*,**/service/impl/storage/s3/ECSStorageService.java"
+    sonar.java.libraries: "target"    
+artifacts:
+  containers:
+    - name: ciam-userportal-services
+      container_file: Dockerfile
+      
+

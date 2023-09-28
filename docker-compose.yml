@@ -1,0 +1,10 @@
+services:
+  portal-service:
+    build: .
+    environment:
+      - IDM_BASEURL
+      - AM_BASEURL
+      - PORTAL_CLIENT_ID
+      - PORTAL_CLIENT_SECRET
+    ports:
+      - "8089:8089"
